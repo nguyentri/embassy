@@ -1,0 +1,6 @@
+[default.general]
+# The target device
+chip = "R7FA4M1AB"
+
+[default.rtt]
+enabled = true

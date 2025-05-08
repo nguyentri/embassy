@@ -1,0 +1,83 @@
+[package]
+name = "embassy-ra"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Embassy Hardware Abstraction Layer (HAL) for Renesas RA series microcontrollers"
+keywords = ["renesas", "async", "ra", "hal", "embedded-hal"]
+categories = ["embedded", "hardware-support", "no-std", "asynchronous"]
+repository = "https://github.com/embassy-rs/embassy"
+documentation = "https://docs.embassy.dev/embassy-ra"
+
+[package.metadata.embassy_docs]
+src_base = "https://github.com/embassy-rs/embassy/blob/embassy-ra-v$VERSION/embassy-ra/src/"
+src_base_git = "https://github.com/embassy-rs/embassy/blob/$COMMIT/embassy-ra/src/"
+
+features = ["defmt", "unstable-pac", "time-driver"]
+
+# Board flavors configuration (for build tooling)
+flavors = [
+  { name = "ra4m1", target = "thumbv7em-none-eabihf", features = ["ra4m1"] },
+  { name = "ra4m2", target = "thumbv8m.main-none-eabihf", features = ["ra4m2"] },
+]
+
+[package.metadata.docs.rs]
+features = ["defmt", "unstable-pac", "time-driver", "ra4m1"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+# Device-specific HAL feature flags
+ra4m1 = ["ra4m1-pac/all"]
+ra4m2 = ["ra4m2-pac/all"]
+default = ["ra4m1"]
+
+## There are no plans to make this stable.
+unstable-pac = []
+
+# Adding portX features to link with ra4m1-pac
+port1 = ["ra4m1-pac/port1"]
+port2 = ["ra4m1-pac/port2"]
+port3 = ["ra4m1-pac/port3"]
+port4 = ["ra4m1-pac/port4"]
+port5 = ["ra4m1-pac/port5"]
+port6 = ["ra4m1-pac/port6"]
+port7 = ["ra4m1-pac/port7"]
+port8 = ["ra4m1-pac/port8"]
+port9 = ["ra4m1-pac/port9"]
+
+[dependencies]
+# Embassy utility dependencies
+embassy-sync = { version = "0.6.2", path = "../embassy-sync" }
+embassy-time = { version = "0.4.0", path = "../embassy-time", optional = true }
+embassy-time-driver = { version = "0.2", path = "../embassy-time-driver", optional = true }
+embassy-time-queue-utils = { version = "0.1", path = "../embassy-time-queue-utils", optional = true }
+embassy-futures = { version = "0.1.0", path = "../embassy-futures" }
+embassy-hal-internal = { version = "0.2.0", path = "../embassy-hal-internal", features = ["cortex-m", "prio-bits-4"] }
+embassy-executor = { version = "0.7.0", path = "../embassy-executor", optional = true }
+embedded-hal-async = "1.0"
+embedded-hal-nb = "1.0"
+embedded-can = "0.4"
+
+# Device PAC crates
+ra4m1-pac = { path = "../ra4m1-pac", features = ["port0", "port1", "rt"], optional = true }
+ra4m2-pac = { version = "0.0.1", features = ["port0", "rt"], optional = true }
+
+# Logging & debug
+defmt = { version = "1.0.1", optional = true }
+log = { version = "0.4.14", optional = true }
+cortex-m-rt = "0.7.5"
+cortex-m = "0.7.6"
+futures-util = { version = "0.3.30", default-features = false }
+rand_core = "0.9.3"
+sdio-host = "0.9.0"
+critical-section = "1.1"
+rtt-target = "0.6.1"
+
+[dev-dependencies]
+critical-section = { version = "1.1", features = ["std"] }
+proptest = "1.5.0"
+proptest-state-machine = "0.3.0"
+
+[build-dependencies]
+proc-macro2 = "1.0.36"
+quote = "1.0.15"

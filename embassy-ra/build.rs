@@ -2,15 +2,26 @@ use std::{
     collections::HashSet,
     fs::File,
     io::{BufRead, BufReader, Write},
+    path::PathBuf,
+    env,
 };
+
 
 fn main() {
     // ---------- Parse -----------------------------------------------------------------------
-    let pins = parse_ra_cfg("./cfg/ra_cfg.txt");
+    let cfg_dir = match std::env::var_os("CFG_DIR") {
+        Some(val) if !val.is_empty() => PathBuf::from(val),
+        _ => {
+            println!("cargo:info=CFG_DIR not set, using current directory");
+            PathBuf::from(".")
+        }
+    };
+    let generated_dir = &PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    let pins = parse_ra_cfg(&cfg_dir.join("ra_cfg.txt").to_string_lossy());
 
     // ---------- Generate --------------------------------------------------------------------
     let mut out =
-        File::create("./cfg/generated.rs").expect("cannot create ./cfg/generated.rs – check path");
+        File::create(generated_dir.join("generated.rs")).expect("cannot create ./generated.rs – check path");
 
     write_preamble(&mut out);
     write_foreach_pin_macro(&mut out, &pins);
@@ -18,8 +29,8 @@ fn main() {
 
     // ---------- Tell Cargo when to re-run ----------------------------------------------------
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=./cfg/ra_cfg.txt");
-    println!("cargo:rerun-if-changed=./cfg/generated.rs");
+    println!("cargo:rerun-if-changed={}/ra_cfg.txt", cfg_dir.display());
+    println!("cargo:rerun-if-changed={}/generated.rs", generated_dir.display());
 }
 
 /* ------------------------------------------------------------------------------------------ */
@@ -97,11 +108,12 @@ fn write_preamble(out: &mut File) {
 
 fn write_foreach_pin_macro(out: &mut File, pins: &[(String, String, u8, u8)]) {
     writeln!(out, "use embassy_hal_internal::impl_peripheral;\n").unwrap();
+    writeln!(out, "#[doc(hidden)]").unwrap();
     writeln!(out, "#[macro_export]").unwrap();
     writeln!(out, "macro_rules! foreach_pin {{").unwrap();
     writeln!(
         out,
-        "    ($macro:path) => {{"
+        "    ($macro:ident) => {{"
     )
     .unwrap();
 

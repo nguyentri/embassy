@@ -3,12 +3,13 @@
 //!
 #![no_std]
 
-pub mod gpio;
-
 #[cfg(feature = "ra4m1")]
 pub use ra4m1_pac as pac;
 
-// Include the generated file to ensure macros like `foreach_pin` are available.
-#[path ="../cfg/generated.rs"]
+// Include generated code
 #[macro_use]
-pub mod generated;
+pub mod generated {
+    include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+}
+// publish modules
+pub mod gpio;

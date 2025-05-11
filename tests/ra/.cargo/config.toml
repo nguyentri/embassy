@@ -1,0 +1,20 @@
+# .cargo/config.toml
+[build]
+# Use the Cortex-M4F target for RA4M1
+target = "thumbv7em-none-eabihf"
+
+# Optionally set a default runner if you use probe-run, cargo-embed, etc.
+# runner = "probe-run"
+
+[target.thumbv7em-none-eabihf]
+runner = "probe-rs run --chip R7FA4M1AB"
+rustflags = [
+  # Use your custom memory layout script if you have one
+  "-C",
+  "link-arg=-Tlink.x",
+  "-C",
+  "link-arg=-nmagic",
+]
+
+[env]
+#CFG_DIR = "./cfg"
